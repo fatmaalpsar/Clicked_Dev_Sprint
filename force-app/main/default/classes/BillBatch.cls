@@ -5,7 +5,7 @@ public with sharing class BillBatch implements Database.Batchable<sObject>, Data
     public Database.QueryLocator start(Database.BatchableContext bc) {
         String query='SELECT Id, Bill_By_Email__c, Active__c 
                       FROM Account 
-                      WHERE Active__c = true AND Bill_By_Email__c != null;
+                      WHERE Active__c = true AND Bill_By_Email__c != null';
         
         //this is a method that will query for all accounts that are active and have a value
         //for Bill_By_Email__c (Account.Active__c = \'Yes\' AND Bill_By_Email != null)

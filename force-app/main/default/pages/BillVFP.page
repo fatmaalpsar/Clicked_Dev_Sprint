@@ -32,8 +32,18 @@
 
     <!--
         Build a table showing the Bill Summary (Bill Name, Bill Balance, and Bill Id) here.
-        Hint: use apex:pageBlockTable to display this in a table.
-    -->
+        Hint: use apex:pageBlockTable to display this in a table. -->
+       
+        <apex:pageBlock title="Bill Summary">
+        
+        <apex:pageBlockTable value="{! bill__c }" var="bl">
+            <apex:column value="{! bl.Name }"/>
+            <apex:column value="{! bl.Balance__c }"/>
+            <apex:column value="{! bl.Id }"/>
+         
+        </apex:pageBlockTable>
+    </apex:pageBlock>
+   
 
     
 </apex:page>
