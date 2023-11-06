@@ -3,9 +3,7 @@ public with sharing class BillBatch implements Database.Batchable<sObject>, Data
     public List<Id> receivesBillByEmail = new List<Id>();
     
     public Database.QueryLocator start(Database.BatchableContext bc) {
-        String query='SELECT Id, Bill_By_Email__c, Active__c 
-                      FROM Account 
-                      WHERE Active__c = true AND Bill_By_Email__c != null';
+        String query='SELECT Id, Bill_By_Email__c FROM Account WHERE Active__c = \'Yes\' AND Bill_By_Email__c != null';
         
         //this is a method that will query for all accounts that are active and have a value
         //for Bill_By_Email__c (Account.Active__c = \'Yes\' AND Bill_By_Email != null)
@@ -23,7 +21,15 @@ public with sharing class BillBatch implements Database.Batchable<sObject>, Data
         //a list of account Ids (this.receivesBillByEmail) to carry over to the finish method.
         //we will do this by iterating over scope and checking whether Bill_By_Email__c == TRUE.
         //This method will also call our BillAPI.getBills() method.
-
+    
+        for (Account a : scope) {
+            if (a.Bill_By_Email__c) {
+                receivesBillByEmail.add(a.Id);
+                BillAPI.getBills();  
+            }
+        }
+        
+        
 
     }
 
@@ -33,7 +39,34 @@ public with sharing class BillBatch implements Database.Batchable<sObject>, Data
         //customer in the receivesBillByEmail list. First, we must query for the recently created bills for
         //each account with the following nested query:
         //[SELECT Id, (SELECT Id FROM Bills__r ORDER BY CreatedDate DESC) FROM Account WHERE Id IN :this.receivesBillByEmail]
+         // Query for the most recent bills for the accounts in receivesBillByEmail
+    Map<Id, Id> billMap = new Map<Id, Id>();
+    Map<Id, String> emailMap = new Map<Id, String>();
 
+    for (Account acc : [SELECT  Id ,Email__c,
+                        (SELECT Id FROM Bills__r ORDER BY CreatedDate DESC) 
+                        FROM Account WHERE Id IN :receivesBillByEmail]) {
+        if (acc.Bills__r.size() > 0) {
+            billMap.put(acc.Id, acc.Bills__r[0].Id);
+            emailMap.put(acc.Id, acc.Email__c);
+        }
+        
+    }
+
+    // Prepare to send emails with bills
+    Map<String, Blob> sendMap = new Map<String, Blob>();
+
+    for (Id accId : billMap.keySet()) {
+        PageReference pageRef = Page.BillVFP;
+        pageRef.getParameters().put('id', billMap.get(accId));
+        Blob pdfBlob = pageRef.getContentAsPDF();
+
+        sendMap.put(emailMap.get(accId), pdfBlob);
+    }
+
+    // Call the BillEmailer.sendEmails(sendMap) method to send emails with bills
+    BillEmailer.sendEmails(sendMap); // 
+}
  
         
         //We will then iterate over the results of this query and associate the Id of the most recent bill (value) with the
@@ -60,4 +93,3 @@ public with sharing class BillBatch implements Database.Batchable<sObject>, Data
 
 
     }
-}

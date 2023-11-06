@@ -3,6 +3,9 @@ public with sharing class BillEmailer {
     public static void sendEmails(Map<String, Blob> emailsWithBills) {
         //instantiate a list of Messaging.SingleEmailMessage objects
 
+        List<Messaging.SingleEmailMessage> emailsToSend = new List<Messaging.SingleEmailMessage>(); 
+
+
 
 
         //iterate over the keyset of the emailsWithBills map and instantiate a single Messaging.SingleEmailMessage
@@ -10,7 +13,12 @@ public with sharing class BillEmailer {
         //Messaging.SingleEmailMessage object.
 
         for(String email : emailsWithBills.keySet()) {
-
+                Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
+                msg.setSubject('Your Recent Bill Details');
+                msg.setPlainTextBody('Recent Bill from Cricet Wirelless has attached');  
+                List<String> bccAddresses = new List<String>();
+            bccAddresses.add(email);
+            msg.setBccAddresses(bccAddresses);
             //use the following
             //to attach the PDF blob to the email:
             Messaging.EmailFileAttachment attach = new Messaging.EmailFileAttachment();
@@ -18,10 +26,11 @@ public with sharing class BillEmailer {
             attach.FileName = 'Bill-' + Date.Today().Month() + '-' + Date.Today().Day() + '-' + Date.Today().Year() + '.pdf';
             attach.ContentType = 'application/pdf';
 
-            mail.setFileAttachments(new Messaging.EmailFileAttachment[]{attach});
+            msg.setFileAttachments(new Messaging.EmailFileAttachment[]{attach});
 
             //add the Messaging.SingleEmailMessage object to the list inside of the loop, and send the email outside of the loop.
-
+            emailsToSend.add(msg);
+            
         }
 
         Messaging.SendEmailResult[] results = Messaging.sendEmail(emailsToSend);

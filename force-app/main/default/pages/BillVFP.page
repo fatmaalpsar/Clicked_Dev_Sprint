@@ -13,8 +13,7 @@
         we can access fields on the Parent object by utilizing the relationship
         between the Bill__c and Account object, Account__r, as seen below:
     -->
-    You are looking at the Most Recent Bill for {!Bill__c.Account__r.Name}.
-    <!--
+      <!--
         The general format of fields on the Parent object will be:
         ChildObject__c.ParentObject__r.FieldName__c
 
@@ -29,21 +28,53 @@
         Hint: use apex:panelGrid and apex:PanelGroup to display this nicely.
     -->
 
+    You are looking at the Most Recent Bill for {!Bill__c.Account__r.Name}.
+      <apex:pageBlock >
+      <apex:panelgrid style="width :100% " columns="2" cellpadding="10">
+        <apex:panelGroup >
+    <b>Email</b>
+    <br/>
+    <apex:outputText value="{!Bill__c.Account__r.Email__c}"/>
+    </apex:panelGroup>
+      <apex:panelGroup >
+    <b>Phone</b>
+    <br/>
+    <apex:outputText value="{!Bill__c.Account__r.Phone}"/>
+    </apex:panelGroup>
+      <apex:panelGroup >
+    <b>Billing Address</b>
+    <br/>
+    <apex:outputText value="{!Bill__c.Account__r.BillingStreet}"/>
+    <br/>
+    <apex:outputText value="{!Bill__c.Account__r.BillingCity}"/>
+    </apex:panelGroup>
+      <apex:panelGroup >
+    <b>Shipping Address</b>
+    <br/>
+    <apex:outputText value="{!Bill__c.Account__r.ShippingStreet}"/>
+    <br/>
+    <apex:outputText value="{!Bill__c.Account__r.ShippingCity}"/>
+    </apex:panelGroup>
+      </apex:panelgrid>
+      </apex:pageBlock>
+  
+  
 
     <!--
         Build a table showing the Bill Summary (Bill Name, Bill Balance, and Bill Id) here.
         Hint: use apex:pageBlockTable to display this in a table. -->
-       
         <apex:pageBlock title="Bill Summary">
-        
-        <apex:pageBlockTable value="{! bill__c }" var="bl">
-            <apex:column value="{! bl.Name }"/>
-            <apex:column value="{! bl.Balance__c }"/>
-            <apex:column value="{! bl.Id }"/>
-         
+        <apex:pageBlockTable value="{!Bill__c}" var="bill" border="1px" width="600px">
+            <apex:column value="{!bill.Name}"></apex:column>
+            <apex:column headerValue="Balance">
+                <apex:panelGrid columns="2" id="balanceGrid">
+                    <apex:outputText value="${!bill.Balance__c}" ></apex:outputText>
+                </apex:panelGrid>
+            </apex:column>
+            <apex:column value="{!bill.Id}"></apex:column>
         </apex:pageBlockTable>
     </apex:pageBlock>
-   
 
     
+
 </apex:page>
